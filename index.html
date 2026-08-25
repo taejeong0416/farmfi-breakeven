@@ -128,25 +128,25 @@
     font-family:var(--sans);font-size:18px;font-weight:800;letter-spacing:-.02em;text-align:center;
   }
   .cell .d{display:block;margin-top:2px;font-size:10px;font-weight:600;opacity:.7;letter-spacing:0}
-  /* 칸은 흰 바탕으로 두고 테두리와 숫자 색으로만 구간을 가른다. */
-  button.cell{cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease}
-  button.cell:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px currentColor,0 6px 16px rgba(20,50,27,.1)}
-  .c-go{color:var(--brand);box-shadow:inset 0 0 0 1px rgba(20,84,46,.3)}
-  .c-warn{color:var(--operator);box-shadow:inset 0 0 0 1px rgba(140,97,20,.45)}
-  .c-over{color:var(--danger);box-shadow:inset 0 0 0 1px rgba(220,38,38,.4)}
+  /* 테두리는 격자 역할만 한다. 구간은 숫자 색 하나로만 가른다. */
+  button.cell{cursor:pointer;box-shadow:inset 0 0 0 1px var(--line);transition:transform 140ms ease,box-shadow 140ms ease}
+  button.cell:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px var(--muted),0 6px 16px rgba(20,50,27,.1)}
+  .c-go{color:var(--brand)}
+  .c-warn{color:var(--operator)}
+  .c-over{color:var(--danger)}
   button.cell.is-sel,
-  button.cell.is-sel:hover{box-shadow:inset 0 0 0 2px currentColor,0 6px 16px rgba(20,50,27,.14)}
+  button.cell.is-sel:hover{box-shadow:inset 0 0 0 2px var(--brand),0 6px 16px rgba(20,50,27,.14)}
   .baseline th{font-size:12px;font-weight:600;color:var(--muted)}
   .baseline .cell{box-shadow:none;color:var(--muted);border:1px dashed var(--line);font-size:15px;font-weight:700}
 
+  /* 범례도 칸과 같은 방식으로 읽힌다 — 색은 숫자에만 있다. */
   .legend{display:grid;gap:8px;margin-top:18px;font-size:12.5px;color:var(--body)}
-  .legend span{display:flex;align-items:center;gap:10px}
-  .legend i{flex:0 0 auto;width:11px;height:11px;border-radius:3px;background:#fff}
-  .legend i.go{box-shadow:inset 0 0 0 1.5px rgba(20,84,46,.55)}
-  .legend i.warn{box-shadow:inset 0 0 0 1.5px rgba(140,97,20,.7)}
-  .legend i.over{box-shadow:inset 0 0 0 1.5px rgba(220,38,38,.65)}
-  .legend i.dash{border:1px dashed var(--line);box-shadow:none}
-  .legend b{flex:0 0 auto;min-width:88px;font-weight:700;color:var(--ink)}
+  .legend span{display:flex;align-items:baseline;gap:10px}
+  .legend b{flex:0 0 auto;min-width:88px;font-weight:800}
+  .legend b.go{color:var(--brand)}
+  .legend b.warn{color:var(--operator)}
+  .legend b.over{color:var(--danger)}
+  .legend b.dash{color:var(--muted)}
   .legend em{font-style:normal;color:var(--muted);font-weight:500}
 
   /* 계산이 성립하지 않는 입력에서는 결과를 감춘다. */
@@ -163,8 +163,7 @@
     .num .n{font-size:46px}
     .tag{font-size:12px}
     .section-head{flex-direction:column;align-items:flex-start}
-    .legend span{align-items:flex-start;flex-wrap:wrap}
-    .legend i{margin-top:5px}
+    .legend span{flex-wrap:wrap}
   }
 </style>
 </head>
@@ -225,10 +224,10 @@
       <table id="matrix"></table>
     </div>
     <div class="legend">
-      <span><i class="go"></i><b id="lgGo"></b><em>지금 목표 판매량으로 감당된다</em></span>
-      <span><i class="warn"></i><b id="lgWarn"></b><em>목표를 넘는다. 성수기에 몰아야 닿는다</em></span>
-      <span><i class="over"></i><b id="lgOver"></b><em>조달 규모나 회수 기간을 다시 잡아야 한다</em></span>
-      <span><i class="dash"></i><b>점선 칸</b><em>투자자 배당을 뺀 매장 운영선</em></span>
+      <span><b class="go" id="lgGo"></b><em>지금 목표 판매량으로 감당된다</em></span>
+      <span><b class="warn" id="lgWarn"></b><em>목표를 넘는다. 성수기에 몰아야 닿는다</em></span>
+      <span><b class="over" id="lgOver"></b><em>조달 규모나 회수 기간을 다시 잡아야 한다</em></span>
+      <span><b class="dash">점선 칸</b><em>투자자 배당을 뺀 매장 운영선</em></span>
     </div>
   </div>
 
