@@ -90,6 +90,7 @@
     font-family:var(--sans);font-size:14px;font-weight:800;color:var(--ink);
   }
   .thr-field input:focus{outline:none;border-bottom-color:var(--brand)}
+  .thr-field input.over{color:var(--danger);border-bottom-color:var(--danger)}
 
   .num{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px}
   .num .n{font-size:64px;font-weight:800;line-height:1;letter-spacing:-.035em;color:var(--brand)}
@@ -193,7 +194,7 @@
   <div class="assume">
    <div class="grp g6">
     <div class="a"><span class="name">유닛 개수</span><span class="u">개</span><input id="units" type="number" value="15" inputmode="numeric" aria-label="유닛 개수"></div>
-    <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월</span><span class="val" id="salesOut">1,470</span></div>
+    <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월 · 하루 49팩</span><span class="val" id="salesOut">1,485</span></div>
     <div class="a"><span class="name">판매가</span><span class="u">원/팩</span><input id="price" type="number" value="5500" inputmode="numeric" aria-label="판매가"></div>
     <div class="a"><span class="name">팩당 변동비</span><span class="u">원/팩</span><input id="cogs" type="number" value="1800" inputmode="numeric" aria-label="팩당 변동비"></div>
     <div class="a"><span class="name">변동 운영비</span><span class="u">원/팩 · 매출의 1.5%</span><span class="val" id="feeOut">83</span></div>
@@ -277,7 +278,7 @@ function read(){
   const total=+$('total').value||0, gov=+$('gov').value||0;
   return {units, price, cogs, fee,
     margin:price-cogs-fee,
-    thr:+$('thr').value||0, sales:(+$('thr').value||0)*30,
+    thr:+$('thr').value||0,
     capacity:units*YIELD*SELL,
     opex:(+$('opex').value||0)*1e4,
     ff:(+$('ff').value||0)*1e4, op:(+$('op').value||0)*1e4, unit:units*UNIT_COST,
@@ -303,13 +304,12 @@ function render(){
   $('unitOut').textContent=(v.unit/1e4).toFixed(1);
   $('capexOut').textContent=num(v.capex/1e4);
 
-  // 계획한 판매량이 유닛이 내는 양을 넘으면 그 자리에서 알린다.
-  const overCap=v.sales>v.capacity;
-  $('salesOut').textContent=num(v.sales);
-  $('salesOut').classList.toggle('over',overCap);
-  $('salesSub').textContent=overCap
-    ? `팩/월 · 유닛 ${v.units}개 능력 ${num(v.capacity)}팩 초과`
-    : '팩/월';
+  // 월 판매량은 유닛이 내는 양 그대로다. 하루 몇 팩인지만 아래에 적고 수식은 적지 않는다.
+  const capDay=Math.floor(v.capacity/30);
+  $('salesOut').textContent=num(v.capacity);
+  $('salesSub').textContent=`팩/월 · 하루 ${capDay}팩`;
+  // 기준을 그 위로 올리면 팔 수 없는 양이므로 기준 칸에서 알린다.
+  $('thr').classList.toggle('over',v.thr>capDay);
 
   const bad = v.units<1  ? '유닛을 1개 이상 두어야 계산이 선다.'
             : v.margin<=0 ? '판매가가 팩당 변동비와 결제 수수료를 넘어야 계산이 선다.'
