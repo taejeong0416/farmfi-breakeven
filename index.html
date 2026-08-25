@@ -193,7 +193,7 @@
   <div class="assume">
    <div class="grp g6">
     <div class="a"><span class="name">유닛 개수</span><span class="u">개</span><input id="units" type="number" value="15" inputmode="numeric" aria-label="유닛 개수"></div>
-    <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월 · 기준 49팩/일 × 30</span><span class="val" id="salesOut">1,470</span></div>
+    <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월</span><span class="val" id="salesOut">1,470</span></div>
     <div class="a"><span class="name">판매가</span><span class="u">원/팩</span><input id="price" type="number" value="5500" inputmode="numeric" aria-label="판매가"></div>
     <div class="a"><span class="name">팩당 변동비</span><span class="u">원/팩</span><input id="cogs" type="number" value="1800" inputmode="numeric" aria-label="팩당 변동비"></div>
     <div class="a"><span class="name">변동 운영비</span><span class="u">원/팩 · 매출의 1.5%</span><span class="val" id="feeOut">83</span></div>
@@ -309,7 +309,7 @@ function render(){
   $('salesOut').classList.toggle('over',overCap);
   $('salesSub').textContent=overCap
     ? `팩/월 · 유닛 ${v.units}개 능력 ${num(v.capacity)}팩 초과`
-    : `팩/월 · 기준 ${v.thr}팩/일 × 30`;
+    : '팩/월';
 
   const bad = v.units<1  ? '유닛을 1개 이상 두어야 계산이 선다.'
             : v.margin<=0 ? '판매가가 팩당 변동비와 결제 수수료를 넘어야 계산이 선다.'
