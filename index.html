@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmFi | 단위경제 타당성</title>
+<meta name="description" content="매장 하나가 운영비와 투자자 회수를 함께 감당하려면 하루 몇 팩을 팔아야 하는지 계산합니다.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  /* FarmFi 웹 팔레트. frontend/tailwind.config.ts 토큰과 같은 값. */
+  :root{
+    --ink:#1A1A1A; --body:#4A4A4A; --muted:#8A8A8A;
+    --line:#E5E5E3; --line-soft:#EDEDEB; --surface:#F1F4F2;
+    --brand:#14542E; --brand-soft:#EAF6EE; --danger:#DC2626;
+    --investor:#207349; --operator:#8C6114;
+    --warn-soft:#FAF3E4; --danger-soft:#FBEDED;
+    --sans:Inter,"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:#fff;color:var(--ink);font-family:var(--sans);
+    line-height:1.5;letter-spacing:0;word-break:keep-all;
+    font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased;
+  }
+  .shell{width:min(100% - 40px,1020px);margin:0 auto;padding:28px 0 56px}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+
+  /* ── 헤더 ───────────────────────────────── */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding-bottom:18px;margin-bottom:22px;border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--brand)}
+  .brand::before{
+    content:"";width:10px;height:10px;border-radius:50%;
+    background:var(--brand);box-shadow:0 0 0 4px var(--brand-soft);
+  }
+  .tag{color:var(--muted);font-size:13px;font-weight:600;text-align:right}
+
+  /* ── 가정값 입력 ────────────────────────── */
+  .assume{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;margin-bottom:18px;
+  }
+  .a{background:#fff;padding:12px 14px}
+  .a label{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px}
+  .a label .u{color:#B0B0AE;font-weight:500}
+  .a input{
+    width:100%;background:transparent;border:none;color:var(--ink);
+    font-family:var(--sans);font-size:18px;font-weight:700;letter-spacing:-.01em;padding:0;
+  }
+  .a input:focus{outline:none}
+  .a input::-webkit-outer-spin-button,.a input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .a input[type=number]{-moz-appearance:textfield}
+  .a.derived{background:var(--surface)}
+  .a.derived .val{display:block;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--brand)}
+
+  /* ── 히어로 ─────────────────────────────── */
+  .hero{
+    position:relative;overflow:hidden;
+    border:1px solid rgba(13,50,31,.12);border-radius:8px;background:#fff;
+    box-shadow:0 10px 28px rgba(20,50,27,.055);
+    padding:28px 30px;margin-bottom:34px;
+  }
+  .hero::after{
+    content:"";position:absolute;top:-45%;right:-8%;width:440px;height:440px;
+    background:radial-gradient(circle,rgba(7,82,47,.07),transparent 62%);pointer-events:none;
+  }
+  .hero>*{position:relative}
+  .hero-top{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;margin-bottom:18px}
+  .pick{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--body);font-weight:600}
+  .pick select{
+    font-family:var(--sans);font-weight:700;font-size:13px;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;
+  }
+  .pick select:hover{border-color:rgba(7,82,47,.35)}
+  .num{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px}
+  .num .n{font-size:64px;font-weight:800;line-height:1;letter-spacing:-.035em;color:var(--brand)}
+  .num .u{font-size:16px;font-weight:700;color:var(--body)}
+  .num .sub{font-size:13px;font-weight:600;color:var(--muted);margin-left:2px}
+  .verdict{
+    display:inline-flex;align-items:center;gap:9px;margin-top:16px;
+    border-radius:8px;padding:10px 15px;font-size:13.5px;font-weight:700;
+  }
+  .verdict .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .v-go{background:var(--brand-soft);color:var(--brand)} .v-go .dot{background:var(--brand)}
+  .v-warn{background:var(--warn-soft);color:var(--operator)} .v-warn .dot{background:var(--operator)}
+  .v-over{background:var(--danger-soft);color:var(--danger)} .v-over .dot{background:var(--danger)}
+
+  .evidence{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--line);border-radius:8px;background:#fff;
+    padding:8px 13px;font-size:12.5px;font-weight:600;color:var(--body);
+  }
+  .chip b{font-size:13px;font-weight:800;color:var(--brand)}
+
+  .stack{margin-top:26px;border-top:1px solid var(--line-soft);padding-top:20px}
+  .stack .cap{font-size:12px;font-weight:700;color:var(--body);margin-bottom:9px}
+  .bar{display:flex;height:32px;border-radius:8px;overflow:hidden;background:var(--surface)}
+  .seg{
+    display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;font-weight:700;color:#fff;min-width:0;white-space:nowrap;
+    font-feature-settings:"tnum" 1;
+  }
+  .seg.op{background:var(--operator)}
+  .seg.fx{background:#6B7C72}
+  .seg.ff{background:#B4C0B8;color:var(--ink)}
+  .seg.inv{background:var(--investor)}
+  .skey{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:12px;font-weight:600;color:var(--muted)}
+  .skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+  /* ── 매트릭스 ───────────────────────────── */
+  .section-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:14px}
+  .section-head h2{font-size:19px;font-weight:800;letter-spacing:-.015em}
+  .section-head span{font-size:13px;font-weight:600;color:var(--muted)}
+  .table-wrap{
+    border:1px solid rgba(13,50,31,.12);border-radius:8px;background:#fff;
+    box-shadow:0 10px 28px rgba(20,50,27,.055);padding:18px 20px;overflow-x:auto;
+  }
+  table{width:100%;border-collapse:collapse;min-width:520px}
+  thead th{font-size:12px;font-weight:700;color:var(--muted);padding:0 4px 10px}
+  thead th.corner{text-align:left;color:var(--brand);font-weight:800;white-space:nowrap}
+  tbody th{
+    font-size:13px;font-weight:700;color:var(--ink);
+    text-align:right;padding-right:14px;white-space:nowrap;
+  }
+  td{padding:0;text-align:center}
+  .cell{
+    margin:3px;border-radius:8px;padding:11px 4px;
+    font-size:18px;font-weight:800;letter-spacing:-.02em;
+  }
+  .cell .d{display:block;margin-top:2px;font-size:10px;font-weight:600;opacity:.7;letter-spacing:0}
+  .c-go{background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 1px rgba(20,84,46,.14)}
+  .c-warn{background:var(--warn-soft);color:var(--operator);box-shadow:inset 0 0 0 1px rgba(140,97,20,.16)}
+  .c-over{background:var(--danger-soft);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(220,38,38,.16)}
+  .baseline th{font-size:12px;font-weight:600;color:var(--muted)}
+  .baseline .cell{
+    background:transparent;box-shadow:none;color:var(--muted);
+    border:1px dashed var(--line);font-size:15px;font-weight:700;
+  }
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px;font-size:12px;font-weight:600;color:var(--muted)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:middle}
+  .legend i.dash{background:#fff;border:1px dashed var(--line)}
+
+  @media(max-width:640px){
+    .shell{width:min(100% - 24px,1020px);padding:20px 0 44px}
+    .hero{padding:22px 18px}
+    .table-wrap{padding:14px}
+    .num .n{font-size:46px}
+    .tag{font-size:12px}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="brand">FarmFi</div>
+    <div class="tag">단위경제 타당성 · 매장 운영 검증</div>
+  </header>
+
+  <div class="assume">
+    <div class="a"><label>판매가 <span class="u">원/팩</span></label><input id="price" type="number" value="5500"></div>
+    <div class="a"><label>팩당 변동비 <span class="u">원/팩</span></label><input id="cogs" type="number" value="1800"></div>
+    <div class="a"><label>월 고정운영비 <span class="u">만원 · 전기+관리</span></label><input id="opex" type="number" value="90"></div>
+    <div class="a"><label>팜피 구독료 <span class="u">만원/월</span></label><input id="ff" type="number" value="30"></div>
+    <div class="a"><label>운영자 생계 <span class="u">만원/월</span></label><input id="op" type="number" value="100"></div>
+    <div class="a"><label>총조성비 <span class="u">만원</span></label><input id="total" type="number" value="5000"></div>
+    <div class="a"><label>공공 지원 <span class="u">만원 · 공간·리모델링</span></label><input id="gov" type="number" value="3000"></div>
+    <div class="a derived"><label>투자자 조달 <span class="u">만원 · STO</span></label><span class="val" id="capexOut">2,000</span></div>
+    <div class="a"><label>목표 일판매 <span class="u">팩/일</span></label><input id="thr" type="number" value="35"></div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-top">
+      <div class="pick">기준안 · 프리미엄
+        <select id="selPrem"><option>6</option><option>8</option><option selected>10</option><option>12</option></select>%
+      </div>
+      <div class="pick">회수기간
+        <select id="selMon"><option>12</option><option>15</option><option selected>18</option><option>24</option><option>30</option></select>개월
+      </div>
+    </div>
+
+    <div class="num"><span class="n" id="hlNum">–</span><span class="u">팩 / 일</span><span class="sub" id="hlMon"></span></div>
+    <div class="verdict" id="verdict"><span class="dot"></span><span id="vtext"></span></div>
+
+    <div class="evidence">
+      <div class="chip"><b>90.9%</b> 야간 신선식품 수요</div>
+      <div class="chip"><b>91.6%</b> 소량 구매 선호</div>
+      <div class="chip"><b>86.9%</b> 즉시 구매 의향</div>
+      <div class="chip">소비자 설문 <b>n=107</b></div>
+    </div>
+
+    <div class="stack">
+      <div class="cap">일 판매량이 감당하는 항목</div>
+      <div class="bar" id="bar"></div>
+      <div class="skey">
+        <span><i style="background:#8C6114"></i>운영자 생계</span>
+        <span><i style="background:#6B7C72"></i>고정운영비</span>
+        <span><i style="background:#B4C0B8"></i>팜피 구독료</span>
+        <span><i style="background:#207349"></i>투자자 회수</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>투자 조건별 필요 판매량</h2>
+    <span>· 프리미엄 × 회수기간</span>
+  </div>
+  <div class="table-wrap">
+    <table id="matrix"></table>
+  </div>
+  <div class="legend">
+    <span><i style="background:#EAF6EE;box-shadow:inset 0 0 0 1px rgba(20,84,46,.2)"></i>안정 운영 구간</span>
+    <span><i style="background:#FAF3E4;box-shadow:inset 0 0 0 1px rgba(140,97,20,.25)"></i>성수기 집중 시 도달</span>
+    <span><i style="background:#FBEDED;box-shadow:inset 0 0 0 1px rgba(220,38,38,.25)"></i>조건 재설계 필요</span>
+    <span><i class="dash"></i>투자자 배당 전 매장 운영선</span>
+  </div>
+
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const PREM=[6,8,10,12], MON=[12,15,18,24,30];
+const fmt=v=>Math.round(v).toLocaleString('ko-KR');
+function read(){
+  const total=+$('total').value, gov=+$('gov').value;
+  return {price:+$('price').value, cogs:+$('cogs').value,
+    opex:+$('opex').value*1e4, ff:+$('ff').value*1e4, op:+$('op').value*1e4,
+    capex:Math.max(0,(total-gov))*1e4, thr:+$('thr').value};
+}
+const invMonthly=(c,r,T)=>c*(1+(r/100)*(T/12))/T;
+function dayReq(v,r,T){
+  const m=v.price-v.cogs, inv=invMonthly(v.capex,r,T);
+  return {day:((v.op+v.opex+v.ff+inv)/m)/30, inv, margin:m};
+}
+const cls=(d,t)=>d<=t?'c-go':d<=t*1.25?'c-warn':'c-over';
+
+function render(){
+  const v=read();
+  $('capexOut').textContent=fmt(v.capex/1e4);
+
+  // matrix
+  let h='<thead><tr><th class="corner">프리미엄＼회수</th>';
+  MON.forEach(m=>h+=`<th>${m}개월</th>`); h+='</tr></thead><tbody>';
+  PREM.forEach(r=>{
+    h+=`<tr><th>연 ${r}%</th>`;
+    MON.forEach(m=>{const d=dayReq(v,r,m).day;
+      h+=`<td><div class="cell ${cls(d,v.thr)}">${d.toFixed(0)}<span class="d">팩/일</span></div></td>`;});
+    h+='</tr>';
+  });
+  const base=(v.op+v.opex+v.ff)/(v.price-v.cogs)/30;
+  h+='<tr class="baseline"><th>투자자 0원</th>';
+  MON.forEach(_=>h+=`<td><div class="cell">${base.toFixed(0)}<span class="d">운영선</span></div></td>`);
+  h+='</tr></tbody>';
+  $('matrix').innerHTML=h;
+
+  // hero
+  const r=+$('selPrem').value, m=+$('selMon').value, res=dayReq(v,r,m);
+  $('hlNum').textContent=res.day.toFixed(0);
+  $('hlMon').textContent=`프리미엄 ${r}% · ${m}개월 회수 기준`;
+  const c=cls(res.day,v.thr), vd=$('verdict'), copy={
+    'c-go':['v-go','안정 수요 구간 — 확보된 수요로 도달 가능한 판매량'],
+    'c-warn':['v-warn','성수기 집중으로 도달 — 비수기 운영 관리 필요'],
+    'c-over':['v-over','목표 판매량 과다 — 조달·회수 조건 재설계 필요']}[c];
+  vd.className='verdict '+copy[0]; $('vtext').textContent=copy[1];
+
+  // stack (팩/일 지분)
+  const per=x=>x/res.margin/30;
+  const parts=[['op',per(v.op)],['fx',per(v.opex)],['ff',per(v.ff)],['inv',per(res.inv)]];
+  const tot=parts.reduce((s,p)=>s+p[1],0);
+  $('bar').innerHTML=parts.map(p=>{const w=(p[1]/tot*100).toFixed(1);
+    return `<div class="seg ${p[0]}" style="width:${w}%">${p[1]>=tot*0.1?p[1].toFixed(0):''}</div>`;}).join('');
+}
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',render));
+render();
+</script>
+</body>
+</html>
