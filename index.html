@@ -197,8 +197,8 @@
     <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월 · 하루 49팩</span><span class="val" id="salesOut">1,485</span></div>
     <div class="a"><span class="name">판매가</span><span class="u">원/팩</span><input id="price" type="number" value="5500" inputmode="numeric" aria-label="판매가"></div>
     <div class="a"><span class="name">팩당 변동비</span><span class="u">원/팩</span><input id="cogs" type="number" value="1800" inputmode="numeric" aria-label="팩당 변동비"></div>
-    <div class="a"><span class="name">변동 운영비</span><span class="u">원/팩 · 매출의 1.5%</span><span class="val" id="feeOut">83</span></div>
-    <div class="a"><span class="name">팩당 마진</span><span class="u">원/팩</span><span class="val" id="marginOut">3,617</span></div>
+    <div class="a"><span class="name">팩당 마진</span><span class="u">원/팩 · 수수료 뺀 값</span><span class="val" id="marginOut">3,617</span></div>
+    <div class="a"><span class="name">변동 운영비</span><span class="u">만원/월 · 매출의 1.5%</span><span class="val" id="feeOut">12.3</span></div>
    </div>
 
    <div class="grp g4">
@@ -299,7 +299,8 @@ const cls=(d,thr)=>{
 
 function render(){
   const v=read();
-  $('feeOut').textContent=num(v.fee);
+  // 수수료는 매출에 비례하니 팩당 마진에서 빼고, 칸에는 이 규모에서 월 얼마인지 적는다.
+  $('feeOut').textContent=(v.fee*v.capacity/1e4).toFixed(1);
   $('marginOut').textContent=num(v.margin);
   $('unitOut').textContent=(v.unit/1e4).toFixed(1);
   $('capexOut').textContent=num(v.capex/1e4);
