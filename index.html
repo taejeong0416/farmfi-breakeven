@@ -14,9 +14,12 @@
   :root{
     --ink:#1A1A1A; --body:#4A4A4A; --muted:#8A8A8A;
     --line:#E5E5E3; --line-soft:#EDEDEB; --surface:#F1F4F2;
-    --brand:#14542E; --brand-soft:#EAF6EE; --danger:#DC2626;
-    --investor:#207349; --operator:#8C6114;
-    --warn-soft:#FAF3E4; --danger-soft:#FBEDED;
+    --brand:#14542E; --brand-soft:#EAF6EE;
+    --operator:#8C6114; --warn-soft:#FAF3E4;
+    --danger:#DC2626; --danger-soft:#FBEDED;
+    /* 스택 바: 매장이 먹는 몫은 무채 램프, 투자자 회수만 브랜드 그린.
+       상태색(골드·레드)은 판정에만 쓴다 — 한 색이 두 뜻을 갖지 않게. */
+    --take-1:#5C6B63; --take-2:#8C9C93; --take-3:#BFC9C3; --take-inv:#14542E;
     --sans:Inter,"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -26,13 +29,13 @@
     line-height:1.5;letter-spacing:0;word-break:keep-all;
     font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased;
   }
-  .shell{width:min(100% - 40px,1020px);margin:0 auto;padding:28px 0 56px}
+  .shell{width:min(100% - 40px,1020px);margin:0 auto;padding:32px 0 64px}
   :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
 
   /* ── 헤더 ───────────────────────────────── */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;gap:16px;
-    padding-bottom:18px;margin-bottom:22px;border-bottom:1px solid var(--line);
+    padding-bottom:20px;margin-bottom:32px;border-bottom:1px solid var(--line);
   }
   .brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--brand)}
   .brand::before{
@@ -41,44 +44,87 @@
   }
   .tag{color:var(--muted);font-size:13px;font-weight:600;text-align:right}
 
-  /* ── 가정값 입력 ────────────────────────── */
-  .assume{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
-    background:var(--line);border:1px solid var(--line);border-radius:8px;
-    overflow:hidden;margin-bottom:18px;
+  /* ── 마진 식 · 핵심 가정 ────────────────── */
+  .margin-row{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 16px;margin-bottom:12px}
+  .mf label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .mf .in{
+    display:flex;align-items:baseline;gap:5px;
+    border-bottom:2px solid var(--line);padding-bottom:6px;
+    transition:border-color 160ms ease;
   }
-  .a{background:#fff;padding:12px 14px}
+  .mf .in:focus-within{border-bottom-color:var(--brand)}
+  .mf input{
+    width:5.5ch;background:transparent;border:none;padding:0;
+    font-family:var(--sans);font-size:30px;font-weight:800;letter-spacing:-.03em;color:var(--ink);
+  }
+  .mf input:focus{outline:none}
+  .mf input::-webkit-outer-spin-button,.mf input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .mf input[type=number]{-moz-appearance:textfield}
+  .mf .unit{font-size:13px;font-weight:600;color:var(--muted)}
+  .mf.out .in{border-bottom-color:var(--brand)}
+  .mf.out b{font-size:30px;font-weight:800;letter-spacing:-.03em;color:var(--brand)}
+  .op{font-size:22px;font-weight:600;color:var(--muted);padding-bottom:10px}
+  .margin-note{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+  /* ── 접히는 가정 상세 ───────────────────── */
+  details.more{border:1px solid var(--line);border-radius:8px;margin-bottom:32px}
+  details.more>summary{
+    list-style:none;cursor:pointer;padding:13px 16px;
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;color:var(--body);
+  }
+  details.more>summary::-webkit-details-marker{display:none}
+  details.more>summary::before{
+    content:"";width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);
+    transform:rotate(-45deg);margin-left:2px;transition:transform 160ms ease;
+  }
+  details.more[open]>summary::before{transform:rotate(45deg)}
+  details.more>summary .sum{color:var(--muted);font-weight:600;margin-left:auto;text-align:right}
+  .more-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+    background:var(--line);border-top:1px solid var(--line);
+  }
+  .a{background:#fff;padding:12px 16px}
   .a label{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px}
   .a label .u{color:#B0B0AE;font-weight:500}
   .a input{
-    width:100%;background:transparent;border:none;color:var(--ink);
-    font-family:var(--sans);font-size:18px;font-weight:700;letter-spacing:-.01em;padding:0;
+    width:100%;background:transparent;border:none;padding:0;
+    font-family:var(--sans);font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--ink);
   }
   .a input:focus{outline:none}
   .a input::-webkit-outer-spin-button,.a input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .a input[type=number]{-moz-appearance:textfield}
   .a.derived{background:var(--surface)}
-  .a.derived .val{display:block;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--brand)}
+  .a.derived .val{display:block;font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--brand)}
 
   /* ── 히어로 ─────────────────────────────── */
   .hero{
-    position:relative;overflow:hidden;
     border:1px solid rgba(13,50,31,.12);border-radius:8px;background:#fff;
     box-shadow:0 10px 28px rgba(20,50,27,.055);
-    padding:28px 30px;margin-bottom:34px;
+    padding:28px 30px;margin-bottom:40px;
   }
-  .hero>*{position:relative}
-  .hero-top{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;margin-bottom:18px}
-  .pick{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--body);font-weight:600}
-  .pick select{
-    font-family:var(--sans);font-weight:700;font-size:13px;color:var(--ink);
-    background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;
+  .hero-top{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;
+    margin-bottom:20px;font-size:13px;font-weight:600;color:var(--body);
   }
-  .pick select:hover{border-color:rgba(7,82,47,.35)}
+  .basis{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--line);border-radius:8px;background:var(--surface);
+    padding:7px 12px;font-size:13px;font-weight:700;color:var(--brand);
+  }
+  .thr-field{display:inline-flex;align-items:baseline;gap:4px;color:var(--body)}
+  .thr-field input{
+    width:3.5ch;background:transparent;border:none;border-bottom:1.5px solid var(--line);
+    padding:0 0 2px;text-align:center;
+    font-family:var(--sans);font-size:14px;font-weight:800;color:var(--ink);
+  }
+  .thr-field input:focus{outline:none;border-bottom-color:var(--brand)}
+  .thr-field input::-webkit-outer-spin-button,.thr-field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .thr-field input[type=number]{-moz-appearance:textfield}
+
   .num{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px}
   .num .n{font-size:64px;font-weight:800;line-height:1;letter-spacing:-.035em;color:var(--brand)}
   .num .u{font-size:16px;font-weight:700;color:var(--body)}
-  .num .sub{font-size:13px;font-weight:600;color:var(--muted);margin-left:2px}
   .verdict{
     display:inline-flex;align-items:center;gap:9px;margin-top:16px;
     border-radius:8px;padding:10px 15px;font-size:13.5px;font-weight:700;
@@ -88,53 +134,56 @@
   .v-warn{background:var(--warn-soft);color:var(--operator)} .v-warn .dot{background:var(--operator)}
   .v-over{background:var(--danger-soft);color:var(--danger)} .v-over .dot{background:var(--danger)}
 
-  .evidence{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
-  .chip{
-    display:inline-flex;align-items:center;gap:7px;
-    border:1px solid var(--line);border-radius:8px;background:#fff;
-    padding:8px 13px;font-size:12.5px;font-weight:600;color:var(--body);
+  .broken{
+    display:none;align-items:center;gap:10px;
+    border-radius:8px;background:var(--danger-soft);color:var(--danger);
+    padding:14px 16px;font-size:14px;font-weight:700;
   }
-  .chip b{font-size:13px;font-weight:800;color:var(--brand)}
 
-  .stack{margin-top:26px;border-top:1px solid var(--line-soft);padding-top:20px}
-  .stack .cap{font-size:12px;font-weight:700;color:var(--body);margin-bottom:9px}
-  .bar{display:flex;height:32px;border-radius:8px;overflow:hidden;background:var(--surface)}
+  .stack{margin-top:28px;border-top:1px solid var(--line-soft);padding-top:22px}
+  .stack .cap{font-size:12px;font-weight:700;color:var(--body);margin-bottom:10px}
+  .bar{display:flex;height:34px;border-radius:8px;overflow:hidden;background:var(--surface)}
   .seg{
     display:flex;align-items:center;justify-content:center;
     font-size:11.5px;font-weight:700;color:#fff;min-width:0;white-space:nowrap;
-    font-feature-settings:"tnum" 1;
   }
-  .seg.op{background:var(--operator)}
-  .seg.fx{background:#6B7C72}
-  .seg.ff{background:#B4C0B8;color:var(--ink)}
-  .seg.inv{background:var(--investor)}
+  .seg.op{background:var(--take-1)}
+  .seg.fx{background:var(--take-2)}
+  .seg.ff{background:var(--take-3);color:var(--ink)}
+  .seg.inv{background:var(--take-inv)}
   .skey{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:12px;font-weight:600;color:var(--muted)}
   .skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle}
+  .skey .invest{color:var(--brand)}
+
+  .basis-note{margin-top:22px;padding-top:20px;border-top:1px solid var(--line-soft);font-size:13.5px;line-height:1.75;color:var(--body)}
+  .basis-note b{font-weight:700;color:var(--ink)}
 
   /* ── 매트릭스 ───────────────────────────── */
-  .section-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:14px}
+  .section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;margin-bottom:14px}
   .section-head h2{font-size:19px;font-weight:800;letter-spacing:-.015em}
-  .section-head span{font-size:13px;font-weight:600;color:var(--muted)}
+  .section-head .hint{font-size:13px;font-weight:600;color:var(--muted)}
   .table-wrap{
     border:1px solid rgba(13,50,31,.12);border-radius:8px;background:#fff;
     box-shadow:0 10px 28px rgba(20,50,27,.055);padding:18px 20px;overflow-x:auto;
   }
-  table{width:100%;border-collapse:collapse;min-width:520px}
+  table{width:100%;border-collapse:collapse;min-width:540px}
   thead th{font-size:12px;font-weight:700;color:var(--muted);padding:0 4px 10px}
   thead th.corner{text-align:left;color:var(--brand);font-weight:800;white-space:nowrap}
-  tbody th{
-    font-size:13px;font-weight:700;color:var(--ink);
-    text-align:right;padding-right:14px;white-space:nowrap;
-  }
+  tbody th{font-size:13px;font-weight:700;color:var(--ink);text-align:right;padding-right:14px;white-space:nowrap}
   td{padding:0;text-align:center}
   .cell{
-    margin:3px;border-radius:8px;padding:11px 4px;
-    font-size:18px;font-weight:800;letter-spacing:-.02em;
+    display:block;width:calc(100% - 6px);margin:3px;
+    border:none;border-radius:8px;padding:11px 4px;
+    font-family:var(--sans);font-size:18px;font-weight:800;letter-spacing:-.02em;
+    text-align:center;
   }
   .cell .d{display:block;margin-top:2px;font-size:10px;font-weight:600;opacity:.7;letter-spacing:0}
+  button.cell{cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease}
+  button.cell:hover{transform:translateY(-2px)}
   .c-go{background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 1px rgba(20,84,46,.14)}
   .c-warn{background:var(--warn-soft);color:var(--operator);box-shadow:inset 0 0 0 1px rgba(140,97,20,.16)}
   .c-over{background:var(--danger-soft);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(220,38,38,.16)}
+  button.cell.is-sel{box-shadow:inset 0 0 0 2px var(--brand),0 6px 16px rgba(20,50,27,.14)}
   .baseline th{font-size:12px;font-weight:600;color:var(--muted)}
   .baseline .cell{
     background:transparent;box-shadow:none;color:var(--muted);
@@ -145,12 +194,21 @@
   .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:middle}
   .legend i.dash{background:#fff;border:1px dashed var(--line)}
 
+  /* 계산이 성립하지 않는 입력에서는 결과를 감춘다. */
+  body.is-broken .num,
+  body.is-broken .verdict,
+  body.is-broken .stack,
+  body.is-broken #matrixBlock{display:none}
+  body.is-broken .broken{display:flex}
+
   @media(max-width:640px){
-    .shell{width:min(100% - 24px,1020px);padding:20px 0 44px}
+    .shell{width:min(100% - 24px,1020px);padding:22px 0 48px}
     .hero{padding:22px 18px}
     .table-wrap{padding:14px}
+    .mf input,.mf.out b{font-size:24px}
     .num .n{font-size:46px}
     .tag{font-size:12px}
+    .section-head{flex-direction:column;align-items:flex-start}
   }
 </style>
 </head>
@@ -162,62 +220,80 @@
     <div class="tag">단위경제 타당성 · 매장 운영 검증</div>
   </header>
 
-  <div class="assume">
-    <div class="a"><label>판매가 <span class="u">원/팩</span></label><input id="price" type="number" value="5500"></div>
-    <div class="a"><label>팩당 변동비 <span class="u">원/팩</span></label><input id="cogs" type="number" value="1800"></div>
-    <div class="a"><label>월 고정운영비 <span class="u">만원 · 전기+관리</span></label><input id="opex" type="number" value="90"></div>
-    <div class="a"><label>팜피 구독료 <span class="u">만원/월</span></label><input id="ff" type="number" value="30"></div>
-    <div class="a"><label>운영자 생계 <span class="u">만원/월</span></label><input id="op" type="number" value="100"></div>
-    <div class="a"><label>총조성비 <span class="u">만원</span></label><input id="total" type="number" value="5000"></div>
-    <div class="a"><label>공공 지원 <span class="u">만원 · 공간·리모델링</span></label><input id="gov" type="number" value="3000"></div>
-    <div class="a derived"><label>투자자 조달 <span class="u">만원 · STO</span></label><span class="val" id="capexOut">2,000</span></div>
-    <div class="a"><label>목표 일판매 <span class="u">팩/일</span></label><input id="thr" type="number" value="35"></div>
+  <div class="margin-row">
+    <div class="mf">
+      <label for="price">판매가</label>
+      <div class="in"><input id="price" type="number" value="5500" inputmode="numeric"><span class="unit">원/팩</span></div>
+    </div>
+    <div class="op">−</div>
+    <div class="mf">
+      <label for="cogs">팩당 변동비</label>
+      <div class="in"><input id="cogs" type="number" value="1800" inputmode="numeric"><span class="unit">원/팩</span></div>
+    </div>
+    <div class="op">=</div>
+    <div class="mf out">
+      <label>팩당 마진</label>
+      <div class="in"><b id="marginOut">3,700</b><span class="unit">원/팩</span></div>
+    </div>
   </div>
+  <p class="margin-note">한 팩이 남기는 이 금액이 매장 고정비와 투자자 회수를 모두 갚는다.</p>
+
+  <details class="more">
+    <summary>고정비와 조달 가정
+      <span class="sum" id="moreSum"></span>
+    </summary>
+    <div class="more-grid">
+      <div class="a"><label for="op">운영자 생계 <span class="u">만원/월</span></label><input id="op" type="number" value="100" inputmode="numeric"></div>
+      <div class="a"><label for="opex">고정운영비 <span class="u">만원/월 · 전기+관리</span></label><input id="opex" type="number" value="90" inputmode="numeric"></div>
+      <div class="a"><label for="ff">팜피 구독료 <span class="u">만원/월</span></label><input id="ff" type="number" value="30" inputmode="numeric"></div>
+      <div class="a"><label for="total">총조성비 <span class="u">만원</span></label><input id="total" type="number" value="5000" inputmode="numeric"></div>
+      <div class="a"><label for="gov">공공 지원 <span class="u">만원 · 공간·리모델링</span></label><input id="gov" type="number" value="3000" inputmode="numeric"></div>
+      <div class="a derived"><label>투자자 조달 <span class="u">만원 · STO</span></label><span class="val" id="capexOut">2,000</span></div>
+    </div>
+  </details>
 
   <section class="hero">
     <div class="hero-top">
-      <div class="pick">기준안 · 프리미엄
-        <select id="selPrem"><option>6</option><option>8</option><option selected>10</option><option>12</option></select>%
-      </div>
-      <div class="pick">회수기간
-        <select id="selMon"><option>12</option><option>15</option><option selected>18</option><option>24</option><option>30</option></select>개월
-      </div>
+      <span class="basis" id="basis">연 10% 프리미엄 · 18개월 회수</span>
+      <span class="thr-field">목표 <input id="thr" type="number" value="35" inputmode="numeric"> 팩/일 기준</span>
     </div>
 
-    <div class="num"><span class="n" id="hlNum">–</span><span class="u">팩 / 일</span><span class="sub" id="hlMon"></span></div>
+    <div class="broken"><span id="brokenMsg"></span></div>
+
+    <div class="num"><span class="n" id="hlNum">–</span><span class="u">팩 / 일</span></div>
     <div class="verdict" id="verdict"><span class="dot"></span><span id="vtext"></span></div>
 
-    <div class="evidence">
-      <div class="chip"><b>90.9%</b> 야간 신선식품 수요</div>
-      <div class="chip"><b>91.6%</b> 소량 구매 선호</div>
-      <div class="chip"><b>86.9%</b> 즉시 구매 의향</div>
-      <div class="chip">소비자 설문 <b>n=107</b></div>
-    </div>
-
     <div class="stack">
-      <div class="cap">일 판매량이 감당하는 항목</div>
+      <div class="cap">이 판매량을 누가 가져가는가</div>
       <div class="bar" id="bar"></div>
       <div class="skey">
-        <span><i style="background:#8C6114"></i>운영자 생계</span>
-        <span><i style="background:#6B7C72"></i>고정운영비</span>
-        <span><i style="background:#B4C0B8"></i>팜피 구독료</span>
-        <span><i style="background:#207349"></i>투자자 회수</span>
+        <span><i style="background:var(--take-1)"></i>운영자 생계</span>
+        <span><i style="background:var(--take-2)"></i>고정운영비</span>
+        <span><i style="background:var(--take-3)"></i>팜피 구독료</span>
+        <span class="invest"><i style="background:var(--take-inv)"></i>투자자 회수</span>
       </div>
     </div>
+
+    <p class="basis-note">
+      소비자 설문 <b>107명</b> 가운데 <b>97명</b>이 야간에 신선식품을 살 곳이 없다고 답했다.
+      한두 끼 분량의 소량 구매를 선호한 응답이 98명, 매장을 보면 그 자리에서 사겠다는 응답이 93명이다.
+    </p>
   </section>
 
-  <div class="section-head">
-    <h2>투자 조건별 필요 판매량</h2>
-    <span>· 프리미엄 × 회수기간</span>
-  </div>
-  <div class="table-wrap">
-    <table id="matrix"></table>
-  </div>
-  <div class="legend">
-    <span><i style="background:#EAF6EE;box-shadow:inset 0 0 0 1px rgba(20,84,46,.2)"></i>안정 운영 구간</span>
-    <span><i style="background:#FAF3E4;box-shadow:inset 0 0 0 1px rgba(140,97,20,.25)"></i>성수기 집중 시 도달</span>
-    <span><i style="background:#FBEDED;box-shadow:inset 0 0 0 1px rgba(220,38,38,.25)"></i>조건 재설계 필요</span>
-    <span><i class="dash"></i>투자자 배당 전 매장 운영선</span>
+  <div id="matrixBlock">
+    <div class="section-head">
+      <h2>투자 조건별 필요 판매량</h2>
+      <span class="hint">칸을 누르면 위 기준이 바뀐다</span>
+    </div>
+    <div class="table-wrap">
+      <table id="matrix"></table>
+    </div>
+    <div class="legend">
+      <span><i style="background:#EAF6EE;box-shadow:inset 0 0 0 1px rgba(20,84,46,.2)"></i>목표 판매량 안</span>
+      <span><i style="background:#FAF3E4;box-shadow:inset 0 0 0 1px rgba(140,97,20,.25)"></i>목표의 1.25배까지</span>
+      <span><i style="background:#FBEDED;box-shadow:inset 0 0 0 1px rgba(220,38,38,.25)"></i>그 위</span>
+      <span><i class="dash"></i>배당 전 매장 운영선</span>
+    </div>
   </div>
 
 </div>
@@ -225,12 +301,14 @@
 <script>
 const $=id=>document.getElementById(id);
 const PREM=[6,8,10,12], MON=[12,15,18,24,30];
-const fmt=v=>Math.round(v).toLocaleString('ko-KR');
+const num=v=>Math.round(v).toLocaleString('ko-KR');
+let sel={prem:10,mon:18};
+
 function read(){
-  const total=+$('total').value, gov=+$('gov').value;
-  return {price:+$('price').value, cogs:+$('cogs').value,
-    opex:+$('opex').value*1e4, ff:+$('ff').value*1e4, op:+$('op').value*1e4,
-    capex:Math.max(0,(total-gov))*1e4, thr:+$('thr').value};
+  const total=+$('total').value||0, gov=+$('gov').value||0;
+  return {price:+$('price').value||0, cogs:+$('cogs').value||0,
+    opex:(+$('opex').value||0)*1e4, ff:(+$('ff').value||0)*1e4, op:(+$('op').value||0)*1e4,
+    capex:Math.max(0,total-gov)*1e4, thr:+$('thr').value||0};
 }
 const invMonthly=(c,r,T)=>c*(1+(r/100)*(T/12))/T;
 function dayReq(v,r,T){
@@ -240,42 +318,64 @@ function dayReq(v,r,T){
 const cls=(d,t)=>d<=t?'c-go':d<=t*1.25?'c-warn':'c-over';
 
 function render(){
-  const v=read();
-  $('capexOut').textContent=fmt(v.capex/1e4);
+  const v=read(), margin=v.price-v.cogs;
+  $('marginOut').textContent=num(margin);
+  $('capexOut').textContent=num(v.capex/1e4);
+  $('moreSum').textContent=`월 고정비 ${num((v.op+v.opex+v.ff)/1e4)}만원 · 투자자 조달 ${num(v.capex/1e4)}만원`;
 
-  // matrix
-  let h='<thead><tr><th class="corner">프리미엄＼회수</th>';
-  MON.forEach(m=>h+=`<th>${m}개월</th>`); h+='</tr></thead><tbody>';
+  const bad = margin<=0 ? '판매가가 팩당 변동비보다 커야 계산이 선다.'
+            : v.thr<=0  ? '목표 일판매를 1팩 이상으로 잡아야 한다.' : '';
+  document.body.classList.toggle('is-broken',!!bad);
+  if(bad){ $('brokenMsg').textContent=bad; return; }
+
+  // 매트릭스 — 각 칸이 기준안 선택 버튼이다.
+  let h='<thead><tr><th class="corner">연 프리미엄</th>';
+  MON.forEach(m=>h+=`<th>${m}개월 회수</th>`); h+='</tr></thead><tbody>';
   PREM.forEach(r=>{
-    h+=`<tr><th>연 ${r}%</th>`;
-    MON.forEach(m=>{const d=dayReq(v,r,m).day;
-      h+=`<td><div class="cell ${cls(d,v.thr)}">${d.toFixed(0)}<span class="d">팩/일</span></div></td>`;});
+    h+=`<tr><th>${r}%</th>`;
+    MON.forEach(m=>{
+      const d=dayReq(v,r,m).day;
+      const on=(r===sel.prem&&m===sel.mon)?' is-sel':'';
+      h+=`<td><button type="button" class="cell ${cls(d,v.thr)}${on}" data-r="${r}" data-m="${m}"`
+        +` aria-pressed="${!!on}">${d.toFixed(0)}<span class="d">팩/일</span></button></td>`;
+    });
     h+='</tr>';
   });
-  const base=(v.op+v.opex+v.ff)/(v.price-v.cogs)/30;
-  h+='<tr class="baseline"><th>투자자 0원</th>';
-  MON.forEach(_=>h+=`<td><div class="cell">${base.toFixed(0)}<span class="d">운영선</span></div></td>`);
+  const base=(v.op+v.opex+v.ff)/margin/30;
+  h+='<tr class="baseline"><th>배당 전 운영선</th>';
+  MON.forEach(()=>h+=`<td><div class="cell">${base.toFixed(0)}<span class="d">팩/일</span></div></td>`);
   h+='</tr></tbody>';
   $('matrix').innerHTML=h;
 
-  // hero
-  const r=+$('selPrem').value, m=+$('selMon').value, res=dayReq(v,r,m);
+  // 히어로
+  const res=dayReq(v,sel.prem,sel.mon);
+  $('basis').textContent=`연 ${sel.prem}% 프리미엄 · ${sel.mon}개월 회수`;
   $('hlNum').textContent=res.day.toFixed(0);
-  $('hlMon').textContent=`프리미엄 ${r}% · ${m}개월 회수 기준`;
-  const c=cls(res.day,v.thr), vd=$('verdict'), copy={
-    'c-go':['v-go','안정 수요 구간 — 확보된 수요로 도달 가능한 판매량'],
-    'c-warn':['v-warn','성수기 집중으로 도달 — 비수기 운영 관리 필요'],
-    'c-over':['v-over','목표 판매량 과다 — 조달·회수 조건 재설계 필요']}[c];
-  vd.className='verdict '+copy[0]; $('vtext').textContent=copy[1];
+  const copy={
+    'c-go':['v-go',`목표 ${v.thr}팩 안에서 매장과 투자자가 함께 돌아간다`],
+    'c-warn':['v-warn','성수기에 몰아야 닿는다. 비수기 판매를 따로 잡아야 한다'],
+    'c-over':['v-over','이 조건으로는 못 맞춘다. 조달 규모나 회수 기간을 다시 잡아야 한다']
+  }[cls(res.day,v.thr)];
+  $('verdict').className='verdict '+copy[0];
+  $('vtext').textContent=copy[1];
 
-  // stack (팩/일 지분)
+  // 스택 — 하루 몇 팩이 어디로 가는가
   const per=x=>x/res.margin/30;
   const parts=[['op',per(v.op)],['fx',per(v.opex)],['ff',per(v.ff)],['inv',per(res.inv)]];
   const tot=parts.reduce((s,p)=>s+p[1],0);
-  $('bar').innerHTML=parts.map(p=>{const w=(p[1]/tot*100).toFixed(1);
-    return `<div class="seg ${p[0]}" style="width:${w}%">${p[1]>=tot*0.1?p[1].toFixed(0):''}</div>`;}).join('');
+  $('bar').innerHTML=parts.map(p=>{
+    const w=(p[1]/tot*100).toFixed(1);
+    return `<div class="seg ${p[0]}" style="width:${w}%">${p[1]>=tot*0.1?p[1].toFixed(0):''}</div>`;
+  }).join('');
 }
-document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',render));
+
+$('matrix').addEventListener('click',e=>{
+  const b=e.target.closest('button.cell');
+  if(!b) return;
+  sel={prem:+b.dataset.r,mon:+b.dataset.m};
+  render();
+});
+document.querySelectorAll('input').forEach(e=>e.addEventListener('input',render));
 render();
 </script>
 </body>
