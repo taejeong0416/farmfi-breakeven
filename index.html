@@ -15,9 +15,9 @@
     --ink:#1A1A1A; --body:#4A4A4A; --muted:#8A8A8A;
     --line:#E5E5E3; --line-soft:#EDEDEB; --surface:#F1F4F2;
     --brand:#14542E; --operator:#8C6114; --danger:#DC2626;
-    /* 스택 바: 매장이 먹는 몫은 순수 무채 3단, 투자자 회수만 브랜드 그린.
-       색상(무채↔녹)과 명도를 함께 벌려 네 구간이 겹쳐 보이지 않게 한다. */
-    --take-1:#4A4A4A; --take-2:#8A8A8A; --take-3:#D4D4D2; --take-inv:#14542E;
+    /* 스택 바: 매장이 먹는 몫은 순수 무채 4단, 투자자 회수만 브랜드 그린.
+       색상(무채↔녹)과 명도를 함께 벌려 다섯 구간이 겹쳐 보이지 않게 한다. */
+    --take-1:#4A4A4A; --take-2:#7A7A7A; --take-3:#A8A8A6; --take-4:#D4D4D2; --take-inv:#14542E;
     --sans:Inter,"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -57,6 +57,7 @@
   }
   .a input:focus{outline:none}
   .a .val{color:var(--brand)}
+  .a .val.over{color:var(--danger)}
 
   /* ── 히어로 ─────────────────────────────── */
   .hero{
@@ -100,7 +101,8 @@
   }
   .seg.op{background:var(--take-1)}
   .seg.fx{background:var(--take-2)}
-  .seg.ff{background:var(--take-3);color:var(--ink)}
+  .seg.un{background:var(--take-3);color:var(--ink)}
+  .seg.ff{background:var(--take-4);color:var(--ink)}
   .seg.inv{background:var(--take-inv)}
   .skey{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:12px;font-weight:600;color:var(--muted)}
   .skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle}
@@ -176,21 +178,30 @@
   </header>
 
   <div class="assume">
+    <div class="a"><span class="name">유닛 개수</span><span class="u">개</span><input id="units" type="number" value="15" inputmode="numeric" aria-label="유닛 개수"></div>
+    <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월</span><span class="val" id="salesOut">1,485</span></div>
     <div class="a"><span class="name">판매가</span><span class="u">원/팩</span><input id="price" type="number" value="5500" inputmode="numeric" aria-label="판매가"></div>
     <div class="a"><span class="name">팩당 변동비</span><span class="u">원/팩</span><input id="cogs" type="number" value="1800" inputmode="numeric" aria-label="팩당 변동비"></div>
-    <div class="a"><span class="name">팩당 마진</span><span class="u">원/팩</span><span class="val" id="marginOut">3,700</span></div>
+    <div class="a"><span class="name">변동 운영비</span><span class="u">% · 결제 수수료</span><input id="fee" type="number" value="2.5" step="0.1" inputmode="decimal" aria-label="변동 운영비"></div>
+    <div class="a"><span class="name">팩당 마진</span><span class="u">원/팩</span><span class="val" id="marginOut">3,563</span></div>
+
     <div class="a"><span class="name">운영자 생계</span><span class="u">만원/월</span><input id="op" type="number" value="100" inputmode="numeric" aria-label="운영자 생계"></div>
-    <div class="a"><span class="name">고정운영비</span><span class="u">만원/월 · 전기·관리</span><input id="opex" type="number" value="90" inputmode="numeric" aria-label="고정운영비"></div>
+    <div class="a"><span class="name">전기료</span><span class="u">만원/월 · 재배+매장부</span><input id="elec" type="number" value="45" inputmode="numeric" aria-label="전기료"></div>
+    <div class="a"><span class="name">관리비</span><span class="u">만원/월</span><input id="mgmt" type="number" value="30" inputmode="numeric" aria-label="관리비"></div>
+    <div class="a"><span class="name">수도료</span><span class="u">만원/월</span><input id="water" type="number" value="15" inputmode="numeric" aria-label="수도료"></div>
+    <div class="a"><span class="name">고정 운영비</span><span class="u">만원/월 · 전기·관리·수도</span><span class="val" id="opexOut">90</span></div>
     <div class="a"><span class="name">팜피 구독료</span><span class="u">만원/월</span><input id="ff" type="number" value="30" inputmode="numeric" aria-label="팜피 구독료"></div>
-    <div class="a"><span class="name">총조성비</span><span class="u">만원</span><input id="total" type="number" value="5000" inputmode="numeric" aria-label="총조성비"></div>
+
+    <div class="a"><span class="name">유닛 연동비</span><span class="u">만원/월 · 소모품·유지보수</span><span class="val" id="unitOut">89.3</span></div>
+    <div class="a"><span class="name">초기 조성비</span><span class="u">만원</span><input id="total" type="number" value="5000" inputmode="numeric" aria-label="초기 조성비"></div>
     <div class="a"><span class="name">공공 지원</span><span class="u">만원 · 공간·리모델링</span><input id="gov" type="number" value="3000" inputmode="numeric" aria-label="공공 지원"></div>
-    <div class="a"><span class="name">투자자 조달</span><span class="u">만원 · STO</span><span class="val" id="capexOut">2,000</span></div>
+    <div class="a"><span class="name">투자자 조달</span><span class="u">만원 · 설비투자금</span><span class="val" id="capexOut">2,000</span></div>
   </div>
 
   <section class="hero">
     <div class="hero-top">
       <span class="basis" id="basis">연 10% 프리미엄 · 18개월 회수</span>
-      <span class="thr-field">목표 <input id="thr" type="number" value="35" inputmode="numeric" aria-label="목표 일판매"> 팩/일 기준</span>
+      <span class="thr-field">목표 <input id="thr" type="number" value="42" inputmode="numeric" aria-label="목표 일판매"> 팩/일 기준</span>
     </div>
 
     <div class="broken"><span id="brokenMsg"></span></div>
@@ -203,8 +214,9 @@
       <div class="bar" id="bar"></div>
       <div class="skey">
         <span><i style="background:var(--take-1)"></i>운영자 생계</span>
-        <span><i style="background:var(--take-2)"></i>고정운영비</span>
-        <span><i style="background:var(--take-3)"></i>팜피 구독료</span>
+        <span><i style="background:var(--take-2)"></i>고정 운영비</span>
+        <span><i style="background:var(--take-3)"></i>유닛 연동비</span>
+        <span><i style="background:var(--take-4)"></i>팜피 구독료</span>
         <span class="invest"><i style="background:var(--take-inv)"></i>투자자 회수</span>
       </div>
     </div>
@@ -237,27 +249,39 @@
 const $=id=>document.getElementById(id);
 const PREM=[6,8,10,12], MON=[12,15,18,24,30];
 const num=v=>Math.round(v).toLocaleString('ko-KR');
+const YIELD=110, SELL=0.9;              // 유닛당 월 생산량(팩) · 판매율
+const UNIT_COST=50000*1.07+6000;        // 유닛당 월 소모품·재배비 + 유지보수비
 let sel={prem:10,mon:18};
 
 function read(){
+  const units=Math.max(0,+$('units').value||0);
+  const price=+$('price').value||0, cogs=+$('cogs').value||0, fee=+$('fee').value||0;
   const total=+$('total').value||0, gov=+$('gov').value||0;
-  return {price:+$('price').value||0, cogs:+$('cogs').value||0,
-    opex:(+$('opex').value||0)*1e4, ff:(+$('ff').value||0)*1e4, op:(+$('op').value||0)*1e4,
+  return {units, price, cogs, fee,
+    margin:price-cogs-price*fee/100,
+    capacity:units*YIELD*SELL,
+    opex:((+$('elec').value||0)+(+$('mgmt').value||0)+(+$('water').value||0))*1e4,
+    ff:(+$('ff').value||0)*1e4, op:(+$('op').value||0)*1e4, unit:units*UNIT_COST,
     capex:Math.max(0,total-gov)*1e4, thr:+$('thr').value||0};
 }
 const invMonthly=(c,r,T)=>c*(1+(r/100)*(T/12))/T;
 function dayReq(v,r,T){
-  const m=v.price-v.cogs, inv=invMonthly(v.capex,r,T);
-  return {day:((v.op+v.opex+v.ff+inv)/m)/30, inv, margin:m};
+  const inv=invMonthly(v.capex,r,T);
+  return {day:((v.op+v.opex+v.ff+v.unit+inv)/v.margin)/30, inv};
 }
 const cls=(d,t)=>d<=t?'c-go':d<=t*1.25?'c-warn':'c-over';
 
 function render(){
-  const v=read(), margin=v.price-v.cogs;
-  $('marginOut').textContent=num(margin);
+  const v=read(), cap=v.capacity/30;     // 하루 생산·판매 능력
+  $('marginOut').textContent=num(v.margin);
+  $('salesOut').textContent=num(v.capacity);
+  $('salesSub').textContent=`팩/월 · 하루 ${cap.toFixed(0)}팩`;
+  $('opexOut').textContent=num(v.opex/1e4);
+  $('unitOut').textContent=(v.unit/1e4).toFixed(1);
   $('capexOut').textContent=num(v.capex/1e4);
 
-  const bad = margin<=0 ? '판매가가 팩당 변동비보다 커야 계산이 선다.'
+  const bad = v.units<1  ? '유닛을 1개 이상 두어야 계산이 선다.'
+            : v.margin<=0 ? '판매가가 팩당 변동비와 결제 수수료를 넘어야 계산이 선다.'
             : v.thr<=0  ? '목표 일판매를 1팩 이상으로 잡아야 한다.' : '';
   document.body.classList.toggle('is-broken',!!bad);
   if(bad){ $('brokenMsg').textContent=bad; return; }
@@ -275,7 +299,7 @@ function render(){
     });
     h+='</tr>';
   });
-  const base=(v.op+v.opex+v.ff)/margin/30;
+  const base=(v.op+v.opex+v.ff+v.unit)/v.margin/30;
   h+='<tr class="baseline"><th>배당 전 운영선</th>';
   MON.forEach(()=>h+=`<td><div class="cell">${base.toFixed(0)}<span class="d">팩/일</span></div></td>`);
   h+='</tr></tbody>';
@@ -299,9 +323,17 @@ function render(){
   $('verdict').className='verdict '+copy[0];
   $('vtext').textContent=copy[1];
 
+  // 유닛이 감당하는 양을 넘으면 목표와 무관하게 못 판다.
+  const overCap=res.day>cap;
+  $('salesOut').classList.toggle('over',overCap);
+  if(overCap){
+    $('verdict').className='verdict v-over';
+    $('vtext').textContent=`유닛 ${v.units}개가 내는 하루 ${cap.toFixed(0)}팩을 넘는다. 유닛을 늘리거나 조건을 다시 잡아야 한다`;
+  }
+
   // 스택 — 하루 몇 팩이 어디로 가는가
-  const per=x=>x/res.margin/30;
-  const parts=[['op',per(v.op)],['fx',per(v.opex)],['ff',per(v.ff)],['inv',per(res.inv)]];
+  const per=x=>x/v.margin/30;
+  const parts=[['op',per(v.op)],['fx',per(v.opex)],['un',per(v.unit)],['ff',per(v.ff)],['inv',per(res.inv)]];
   const tot=parts.reduce((s,p)=>s+p[1],0);
   $('bar').innerHTML=parts.map(p=>{
     const w=(p[1]/tot*100).toFixed(1);
