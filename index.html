@@ -193,7 +193,7 @@
   <div class="assume">
    <div class="grp g6">
     <div class="a"><span class="name">유닛 개수</span><span class="u">개</span><input id="units" type="number" value="15" inputmode="numeric" aria-label="유닛 개수"></div>
-    <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월 · 하루 50팩</span><input id="sales" type="number" value="1485" inputmode="numeric" aria-label="월 판매량"></div>
+    <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월 · 기준 49팩/일 × 30</span><span class="val" id="salesOut">1,470</span></div>
     <div class="a"><span class="name">판매가</span><span class="u">원/팩</span><input id="price" type="number" value="5500" inputmode="numeric" aria-label="판매가"></div>
     <div class="a"><span class="name">팩당 변동비</span><span class="u">원/팩</span><input id="cogs" type="number" value="1800" inputmode="numeric" aria-label="팩당 변동비"></div>
     <div class="a"><span class="name">변동 운영비</span><span class="u">원/팩 · 매출의 1.5%</span><span class="val" id="feeOut">83</span></div>
@@ -217,7 +217,7 @@
   <section class="hero">
     <div class="hero-top">
       <span class="basis" id="basis">연 10% 프리미엄 · 18개월 회수</span>
-      <span class="thr-field">기준 <input id="thr" type="number" value="50" inputmode="numeric" aria-label="기준 일판매"> 팩/일</span>
+      <span class="thr-field">기준 <input id="thr" type="number" value="49" inputmode="numeric" aria-label="기준 일판매"> 팩/일</span>
     </div>
 
     <div class="broken"><span id="brokenMsg"></span></div>
@@ -277,7 +277,7 @@ function read(){
   const total=+$('total').value||0, gov=+$('gov').value||0;
   return {units, price, cogs, fee,
     margin:price-cogs-fee,
-    sales:+$('sales').value||0, thr:+$('thr').value||0,
+    thr:+$('thr').value||0, sales:(+$('thr').value||0)*30,
     capacity:units*YIELD*SELL,
     opex:(+$('opex').value||0)*1e4,
     ff:(+$('ff').value||0)*1e4, op:(+$('op').value||0)*1e4, unit:units*UNIT_COST,
@@ -305,10 +305,11 @@ function render(){
 
   // 계획한 판매량이 유닛이 내는 양을 넘으면 그 자리에서 알린다.
   const overCap=v.sales>v.capacity;
-  $('sales').classList.toggle('over',overCap);
+  $('salesOut').textContent=num(v.sales);
+  $('salesOut').classList.toggle('over',overCap);
   $('salesSub').textContent=overCap
     ? `팩/월 · 유닛 ${v.units}개 능력 ${num(v.capacity)}팩 초과`
-    : `팩/월 · 하루 ${v.thr}팩`;
+    : `팩/월 · 기준 ${v.thr}팩/일 × 30`;
 
   const bad = v.units<1  ? '유닛을 1개 이상 두어야 계산이 선다.'
             : v.margin<=0 ? '판매가가 팩당 변동비와 결제 수수료를 넘어야 계산이 선다.'
@@ -369,16 +370,11 @@ $('matrix').addEventListener('click',e=>{
   sel={prem:+b.dataset.r,mon:+b.dataset.m};
   render();
 });
-// 유닛 개수 · 월 판매량 · 하루 기준은 서로 물려 있다. 셋 다 직접 고칠 수 있고,
-// 고친 칸을 뺀 나머지가 따라 온다. 유닛을 건드리면 판매량과 기준이 유닛 기준으로 다시 채워진다.
-const LINKED={
-  units:()=>{ $('sales').value=Math.round((+$('units').value||0)*YIELD*SELL);
-              $('thr').value=Math.round((+$('sales').value||0)/30); },
-  sales:()=>{ $('thr').value=Math.round((+$('sales').value||0)/30); },
-  thr:  ()=>{ $('sales').value=Math.round((+$('thr').value||0)*30); }
-};
+// 판매량 쪽에서 손으로 고치는 값은 하루 기준 하나다. 월 판매량은 그 30배로 따라온다.
+// 유닛 개수를 건드리면 기준이 유닛이 내는 양(110팩 · 판매율 90%)으로 다시 채워진다.
+// 내림으로 채워야 재채움 직후에 능력 초과로 잡히지 않는다.
 document.querySelectorAll('input').forEach(e=>e.addEventListener('input',()=>{
-  if(LINKED[e.id]) LINKED[e.id]();
+  if(e.id==='units') $('thr').value=Math.floor((+$('units').value||0)*YIELD*SELL/30);
   render();
 }));
 render();
