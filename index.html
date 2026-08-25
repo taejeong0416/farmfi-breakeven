@@ -83,13 +83,8 @@
     border:1px solid var(--line);border-radius:8px;
     padding:7px 12px;font-size:13px;font-weight:700;color:var(--brand);
   }
-  .thr-field{display:inline-flex;align-items:baseline;gap:4px;color:var(--body)}
-  .thr-field input{
-    width:3.5ch;background:transparent;border:none;border-bottom:1.5px solid var(--line);
-    padding:0 0 2px;text-align:center;
-    font-family:var(--sans);font-size:14px;font-weight:800;color:var(--ink);
-  }
-  .thr-field input:focus{outline:none;border-bottom-color:var(--brand)}
+  .thr-field{color:var(--body)}
+  .thr-field b{font-size:14px;font-weight:800;color:var(--ink)}
 
   .num{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px}
   .num .n{font-size:64px;font-weight:800;line-height:1;letter-spacing:-.035em;color:var(--brand)}
@@ -217,7 +212,7 @@
   <section class="hero">
     <div class="hero-top">
       <span class="basis" id="basis">연 10% 프리미엄 · 18개월 회수</span>
-      <span class="thr-field">목표 <input id="thr" type="number" value="42" inputmode="numeric" aria-label="목표 일판매"> 팩/일 기준</span>
+      <span class="thr-field">유닛 <b id="thrUnits">15</b>개가 내는 <b id="thrCap">49</b>팩/일 기준</span>
     </div>
 
     <div class="broken"><span id="brokenMsg"></span></div>
@@ -252,9 +247,9 @@
       <table id="matrix"></table>
     </div>
     <div class="legend">
-      <span><b class="go" id="lgGo"></b><em>지금 목표 판매량으로 감당된다</em></span>
-      <span><b class="warn" id="lgWarn"></b><em>목표를 넘는다. 성수기에 몰아야 닿는다</em></span>
-      <span><b class="over" id="lgOver"></b><em>조달 규모나 회수 기간을 다시 잡아야 한다</em></span>
+      <span><b class="go" id="lgGo"></b><em>유닛이 내는 양 안에서 여유가 있다</em></span>
+      <span><b class="warn" id="lgWarn"></b><em>낼 수 있는 양을 거의 다 팔아야 닿는다</em></span>
+      <span><b class="over" id="lgOver"></b><em>유닛을 늘리거나 조달 조건을 다시 잡아야 한다</em></span>
       <span><b class="dash">점선 칸</b><em>투자자 배당을 뺀 매장 운영선</em></span>
     </div>
   </div>
@@ -280,27 +275,34 @@ function read(){
     capacity:units*YIELD*SELL,
     opex:(+$('opex').value||0)*1e4,
     ff:(+$('ff').value||0)*1e4, op:(+$('op').value||0)*1e4, unit:units*UNIT_COST,
-    capex:Math.max(0,total-gov)*1e4, thr:+$('thr').value||0};
+    capex:Math.max(0,total-gov)*1e4};
 }
 const invMonthly=(c,r,T)=>c*(1+(r/100)*(T/12))/T;
 function dayReq(v,r,T){
   const inv=invMonthly(v.capex,r,T);
   return {day:((v.op+v.opex+v.ff+v.unit+inv)/v.margin)/30, inv};
 }
-const cls=(d,t)=>d<=t?'c-go':d<=t*1.25?'c-warn':'c-over';
+// 기준은 유닛이 내는 하루 판매량이다. 그 85%까지가 여유, 100%까지가 빠듯, 넘으면 못 판다.
+// 칸에 적히는 반올림값으로 갈라 색과 범례가 어긋나지 않게 한다.
+const EASE=0.85;
+const cls=(d,cap)=>{
+  const n=Math.round(d);
+  return n<=Math.floor(cap*EASE)?'c-go':n<=Math.floor(cap)?'c-warn':'c-over';
+};
 
 function render(){
-  const v=read(), cap=v.capacity/30;     // 하루 생산·판매 능력
+  const v=read(), cap=v.capacity/30, capD=Math.floor(cap);   // 하루 생산·판매 능력
   $('feeOut').textContent=num(v.fee);
   $('marginOut').textContent=num(v.margin);
   $('salesOut').textContent=num(v.capacity);
-  $('salesSub').textContent=`팩/월 · 하루 ${cap.toFixed(0)}팩`;
+  $('salesSub').textContent=`팩/월 · 하루 ${capD}팩`;
   $('unitOut').textContent=(v.unit/1e4).toFixed(1);
   $('capexOut').textContent=num(v.capex/1e4);
+  $('thrUnits').textContent=v.units;
+  $('thrCap').textContent=capD;
 
   const bad = v.units<1  ? '유닛을 1개 이상 두어야 계산이 선다.'
-            : v.margin<=0 ? '판매가가 팩당 변동비와 결제 수수료를 넘어야 계산이 선다.'
-            : v.thr<=0  ? '목표 일판매를 1팩 이상으로 잡아야 한다.' : '';
+            : v.margin<=0 ? '판매가가 팩당 변동비와 결제 수수료를 넘어야 계산이 선다.' : '';
   document.body.classList.toggle('is-broken',!!bad);
   if(bad){ $('brokenMsg').textContent=bad; return; }
 
@@ -312,7 +314,7 @@ function render(){
     MON.forEach(m=>{
       const d=dayReq(v,r,m).day;
       const on=(r===sel.prem&&m===sel.mon);
-      h+=`<td><button type="button" class="cell ${cls(d,v.thr)}${on?' is-sel':''}"`
+      h+=`<td><button type="button" class="cell ${cls(d,cap)}${on?' is-sel':''}"`
         +` data-r="${r}" data-m="${m}" aria-pressed="${on}">${d.toFixed(0)}<span class="d">팩/일</span></button></td>`;
     });
     h+='</tr>';
@@ -323,31 +325,25 @@ function render(){
   h+='</tr></tbody>';
   $('matrix').innerHTML=h;
 
-  // 범례 — 지금 목표값에서 각 구간이 실제 몇 팩인지 적는다.
-  const hi=Math.floor(v.thr*1.25);
-  $('lgGo').textContent=`${v.thr}팩 이하`;
-  $('lgWarn').textContent=hi>v.thr?`${v.thr+1}–${hi}팩`:'해당 없음';
-  $('lgOver').textContent=`${hi+1}팩 이상`;
+  // 범례 — 지금 유닛 수가 내는 양에서 각 구간이 실제 몇 팩인지 적는다.
+  const ease=Math.floor(cap*EASE);
+  $('lgGo').textContent=`${ease}팩 이하`;
+  $('lgWarn').textContent=capD>ease?`${ease+1}–${capD}팩`:'해당 없음';
+  $('lgOver').textContent=`${capD+1}팩 이상`;
 
   // 히어로
   const res=dayReq(v,sel.prem,sel.mon);
+  const verdict=cls(res.day,cap);
   $('basis').textContent=`연 ${sel.prem}% 프리미엄 · ${sel.mon}개월 회수`;
   $('hlNum').textContent=res.day.toFixed(0);
   const copy={
-    'c-go':['v-go',`목표 ${v.thr}팩 안에서 매장과 투자자가 함께 돌아간다`],
-    'c-warn':['v-warn','성수기에 몰아야 닿는다. 비수기 판매를 따로 잡아야 한다'],
-    'c-over':['v-over','이 조건으로는 못 맞춘다. 조달 규모나 회수 기간을 다시 잡아야 한다']
-  }[cls(res.day,v.thr)];
+    'c-go':['v-go',`유닛 ${v.units}개가 내는 ${capD}팩 안에서 매장과 투자자가 함께 돌아간다`],
+    'c-warn':['v-warn',`유닛 ${v.units}개가 내는 ${capD}팩을 거의 다 팔아야 닿는다. 비수기 판매를 따로 잡아야 한다`],
+    'c-over':['v-over',`유닛 ${v.units}개가 내는 ${capD}팩을 넘는다. 유닛을 늘리거나 조달 조건을 다시 잡아야 한다`]
+  }[verdict];
   $('verdict').className='verdict '+copy[0];
   $('vtext').textContent=copy[1];
-
-  // 유닛이 감당하는 양을 넘으면 목표와 무관하게 못 판다.
-  const overCap=res.day>cap;
-  $('salesOut').classList.toggle('over',overCap);
-  if(overCap){
-    $('verdict').className='verdict v-over';
-    $('vtext').textContent=`유닛 ${v.units}개가 내는 하루 ${cap.toFixed(0)}팩을 넘는다. 유닛을 늘리거나 조건을 다시 잡아야 한다`;
-  }
+  $('salesOut').classList.toggle('over',verdict==='c-over');
 
   // 스택 — 하루 몇 팩이 어디로 가는가
   const per=x=>x/v.margin/30;
