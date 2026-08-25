@@ -44,12 +44,16 @@
   /* ── 가정값 ─────────────────────────────
      이름 / 단위 / 값 세 줄을 고정 자리에 두어 칸마다 값의 baseline이 맞는다. */
   .assume{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
     background:#fff;border:1px solid var(--line);border-radius:8px;
     overflow:hidden;margin-bottom:36px;
   }
-  /* 칸이 제 왼쪽·위 선을 그리고 1px 물러난다 — 마지막 줄이 덜 차도 빈 칸이 비지 않는다. */
+  /* 단가 6 · 월 비용 4 · 조달 3. 줄당 칸 수를 묶음 크기의 약수로만 두어
+     어느 폭에서도 줄이 꽉 차고 칸 폭이 벌어지지 않는다. */
+  .g6{display:grid;grid-template-columns:repeat(6,1fr)}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr)}
+  .g3{display:grid;grid-template-columns:repeat(3,1fr)}
   .a{
+    min-width:0;
     background:#fff;padding:14px 16px;display:grid;align-content:start;
     border-left:1px solid var(--line);border-top:1px solid var(--line);
     margin:-1px 0 0 -1px;
@@ -163,6 +167,10 @@
   body.is-broken #matrixBlock{display:none}
   body.is-broken .broken{display:flex}
 
+  @media(max-width:1000px){ .g6{grid-template-columns:repeat(3,1fr)} }
+  @media(max-width:700px){ .g4{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:560px){ .g6{grid-template-columns:repeat(2,1fr)} }
+
   @media(max-width:640px){
     .shell{width:min(100% - 24px,1020px);padding:22px 0 48px}
     .hero{padding:22px 18px}
@@ -183,20 +191,27 @@
   </header>
 
   <div class="assume">
+   <div class="grp g6">
     <div class="a"><span class="name">유닛 개수</span><span class="u">개</span><input id="units" type="number" value="15" inputmode="numeric" aria-label="유닛 개수"></div>
     <div class="a"><span class="name">월 판매량</span><span class="u" id="salesSub">팩/월</span><span class="val" id="salesOut">1,485</span></div>
     <div class="a"><span class="name">판매가</span><span class="u">원/팩</span><input id="price" type="number" value="5500" inputmode="numeric" aria-label="판매가"></div>
     <div class="a"><span class="name">팩당 변동비</span><span class="u">원/팩</span><input id="cogs" type="number" value="1800" inputmode="numeric" aria-label="팩당 변동비"></div>
     <div class="a"><span class="name">변동 운영비</span><span class="u">원/팩 · 매출의 1.5%</span><span class="val" id="feeOut">83</span></div>
     <div class="a"><span class="name">팩당 마진</span><span class="u">원/팩</span><span class="val" id="marginOut">3,617</span></div>
+   </div>
 
+   <div class="grp g4">
     <div class="a"><span class="name">운영자 생계</span><span class="u">만원/월</span><input id="op" type="number" value="100" inputmode="numeric" aria-label="운영자 생계"></div>
     <div class="a"><span class="name">고정 운영비</span><span class="u">만원/월 · 전기·관리·수도</span><input id="opex" type="number" value="90" inputmode="numeric" aria-label="고정 운영비"></div>
     <div class="a"><span class="name">팜피 구독료</span><span class="u">만원/월</span><input id="ff" type="number" value="30" inputmode="numeric" aria-label="팜피 구독료"></div>
     <div class="a"><span class="name">유닛 연동비</span><span class="u">만원/월 · 소모품·유지보수</span><span class="val" id="unitOut">89.3</span></div>
+   </div>
+
+   <div class="grp g3">
     <div class="a"><span class="name">초기 조성비</span><span class="u">만원</span><input id="total" type="number" value="5000" inputmode="numeric" aria-label="초기 조성비"></div>
     <div class="a"><span class="name">공공 지원</span><span class="u">만원 · 공간·리모델링</span><input id="gov" type="number" value="3000" inputmode="numeric" aria-label="공공 지원"></div>
     <div class="a"><span class="name">투자자 조달</span><span class="u">만원 · 설비투자금</span><span class="val" id="capexOut">2,000</span></div>
+   </div>
   </div>
 
   <section class="hero">
